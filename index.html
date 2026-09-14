@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu tablero</title>
+
+    <link rel="stylesheet" href="src/css/styles.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <!-- HEADER & NAVEGATION BAR -->
+
+    <header class="navbar">
+
+        <container class="page-title">
+            <img class="logo" src="images/kanso-logo.png" alt="kanso© logo">
+            <h1>kanso<sup>©</sup></h1>
+        </container>
+            
+        <section class="right-header">
+
+            <form class="search-container">
+                <input type="text" id="searchinput" placeholder="Buscar tareas por título...">
+            </form>
+
+            <button class="menu-toggle" id="menutoggle" aria-label="Abrir menú">
+                <i data-lucide="menu"></i>
+            </button>
+
+            <nav class="nav-links" id="navlinks">
+                <button id="btn-newcolumn" class="btn btn-secondary">
+                    <i data-lucide="layout-list"></i> Nueva Columna
+                </button>
+                <button id="btn-newtask" class="btn btn-primary">
+                    <i data-lucide="plus"></i> Nueva Tarea
+                </button>
+            </nav>
+
+        </section>
+    </header>
+
+    <!-- DASHBOARD STATISTICS & PROGRESS BAR -->
+
+    <aside class="dashboard-stats">
+
+        <!-- Dashboard stats -->
+        <section class="aside-stats">
+            <container class="left-stats">
+                <li class="stat-card">
+                    <h3>TOTAL</h3>
+                    <span id="stattotal">0</span>
+                </li>
+                <li class="stat-card">
+                    <h3>POR HACER</h3>
+                    <span id="statodo">0</span>
+                </li>
+                <li class="stat-card">
+                    <h3>EN PROCESO</h3>
+                    <span id="statdoing">0</span>
+                </li>
+                <li class="stat-card">
+                    <h3>FINALIZADO</h3>
+                    <span id="statdone">0</span>
+                </li>
+            </container>
+
+            <!-- Progress bar -->
+            <statsbar class="right-stats">
+                <label class="progress-header">
+                    <h3>PROGRESO COMPLETADO</h3>
+                    <span id="progressPercentage">0%</span>
+                </label>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+            </statsbar>
+            
+        </section>
+    </aside>
+
+    <!-- MAIN CONTENT ("KANBAN BOARDS") -->
+
+    <main class="board">
+
+        <!-- Columns (TO DO, DOING, DONE) -->
+
+        <!-- Columna Por Hacer (TO DO) -->
+        <container class="column" data-status="todo">
+
+            <div class="column-header todo-header">
+                <h2>Por hacer</h2>
+                <span class="badge" id="count-todo">0</span>
+            </div>
+            <div class="task-list" id="list-todo"></div>
+
+        </container>
+
+        <!-- Columna En Proceso (DOING) -->
+        <container class="column" data-status="doing">
+
+            <section class="column-header doing-header">
+                <h2>En proceso</h2>
+                <span class="badge" id="count-doing">0</span>
+            </section>
+
+            <div class="task-list" id="list-doing"></div>
+
+        </container>
+
+        <!-- Columna Finalizado (DONE) -->
+        <container class="column" data-status="done">
+
+            <section class="column-header done-header">
+                <h2>Finalizado</h2>
+                <span class="badge" id="count-done">0</span>
+            </section>
+
+            <div class="task-list" id="list-done"></div>
+
+        </container>
+
+    </main>
+
+    <!-- Modal: Crear Tarea -->
+
+    <container class="modal-overlay" id="modalCreateTask">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h2>Crear nueva tarea</h2>
+            <button class="close-modal">&times;</button>
+        </div>
+
+        <form id="formCreateTask">
+
+            <div class="form-group">
+                <label for="createTitle">Título *</label>
+                <input type="text" id="createTitle" required placeholder="Ej. Diseñar prototipo">
+            </div>
+
+            <div class="form-group">
+                <label for="createDescription">Descripción</label>
+                <textarea id="createDescription" rows="3" placeholder="Detalles de la tarea..."></textarea>
+            </div>
+
+            <div class="form-row">
+
+                <div class="form-group">
+                    <label for="createPriority">Prioridad</label>
+                    <select id="createPriority">
+                        <option value="Baja">Baja</option>
+                        <option value="Media" selected>Media</option>
+                        <option value="Alta">Alta</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="createDueDate">Fecha Límite *</label>
+                    <input type="date" id="createDueDate" required>
+                </div>
+
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar Tarea</button>
+            </div>
+        </form>
+        </div>
+    </container>
+
+    <!-- Modal: Detalle / Edición / Comentarios -->
+
+    <container class="modal-overlay" id="modalTaskDetail">
+        
+        <div class="modal-content modal-large">
+        <div class="modal-header">
+            <span id="detailPriorityBadge" class="priority-badge">Baja</span>
+            <button class="close-modal">&times;</button>
+        </div>
+        
+        <form id="formEditTask">
+            
+            <input type="hidden" id="editTaskId">
+
+            <div class="form-group">
+                <input type="text" id="editTitle" class="input-title-edit" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editDescription">Descripción</label>
+                <textarea id="editDescription" rows="3"></textarea>
+            </div>
+
+            <section class="form-row">
+
+                <div class="form-group">
+
+                    <label for="editPriority">Prioridad</label>
+                    <select id="editPriority">
+                        <option value="Baja">Baja</option>
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                    </select>
+                    
+                </div>
+
+                <div class="form-group">
+                    <label for="editDueDate">Fecha Límite</label>
+                    <input type="date" id="editDueDate" required>
+                </div>
+
+            </section>
+
+            <div class="modal-actions-space">
+
+                <button type="button" id="btnDeleteTask" class="btn btn-danger">
+                    <i data-lucide="trash-2"></i> Eliminar Tarea
+                </button>
+                <button type="submit" class="btn btn-primary">Actualizar Cambios</button>
+
+            </div>
+
+        </form>
+
+        <hr class="divider">
+
+        <!-- Sección de Comentarios -->
+        <section class="comments-section">
+
+            <h3>Comentarios</h3>
+            <div class="comments-list" id="commentsList"></div>
+
+            <form id="formAddComment" class="comment-form">
+                <div class="form-group">
+                    <input type="text" id="commentAuthor" placeholder="Tu nombre..." required>
+                </div>
+                <div class="form-group">
+                    <textarea id="commentText" rows="2" placeholder="Escribe un comentario..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-secondary">Comentar</button>
+            </form>
+
+        </section>
+        </div>
+    </container>
+
+    <!-- Modal: Crear Columna -->
+    <container class="modal-overlay" id="modalCreateColumn">
+
+        <section class="modal-content">
+            <div class="modal-header">
+                <h2>Crear nueva columna</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+
+            <form id="formCreateColumn">
+                <div class="form-group">
+                    <label for="columnTitle">Nombre de la columna *</label>
+                    <input type="text" id="columnTitle" required placeholder="Ej. En Revisión">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear Columna</button>
+                </div>
+            </form>
+
+        </section>
+
+    </container>
+
+    <script type="module" src="src/js/app.js"></script>
+</body>
+</html>
